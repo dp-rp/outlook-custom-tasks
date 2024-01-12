@@ -4,6 +4,7 @@
 
 # built in
 from pprint import pprint
+from typing import List
 # site
 import win32com.client
 # package
@@ -12,13 +13,17 @@ from outlookcustomtasks.settings import get_settings
 # -----------------
 # --- CONSTANTS ---
 # -----------------
-VALID_MOVE_REPONSE_OPTIONS = ["Y","n"]
+MOVE_RESPONSE_DEFAULT = "n"
 
 # ---------------------
 # --- INITIALIZATION ---
 # ---------------------
 _settings = get_settings()
 outlook = win32com.client.Dispatch('Outlook.Application').GetNamespace("MAPI")
+
+def move_messages(messages: List[win32com.client.CDispatch], target_folder: win32com.client.CDispatch):
+    # TODO: implement
+    raise NotImplementedError
 
 # --------------
 # --- SCRIPT ---
@@ -35,13 +40,25 @@ for folder in inbox.Folders:
 if not target_folder:
     raise RuntimeError("Failed to find target folder")
 
-match_count = 0
+matches = []
 for message in inbox.Items:
     if message.Subject == _settings["subject_to_match"]:
         print(f"Found match: \"{message.Subject}\" from [{message.SenderEmailAddress}]({message.SenderName})] at {message.ReceivedTime}")
-        match_count += 1
+        matches.append(message)
 
-# move_response = None
-# while not (move_response in VALID_MOVE_REPONSE_OPTIONS):
-#     move_response = input(f"Found {match_count} matching emails. Move them to {TARGET_FOLDER_NAME}? (Y/n) [n]:")
-#     if VALID_MOVE_REPONSE_OPTIONS
+while True:
+    move_response = input(f"Found {len(matches)} matching emails. Move them to {_settings['target_folder_name']}? (Y/n) [{MOVE_RESPONSE_DEFAULT}]:")
+
+    if move_response == "":
+        move_response = MOVE_RESPONSE_DEFAULT
+        
+    if move_response == "Y":
+        print("moving...")
+        move_messages(matches, target_folder)
+        print("moved!")
+        break
+    elif move_response == "n":
+        print("skipping move.")
+        break
+    else:
+        print("Invalid response.")
