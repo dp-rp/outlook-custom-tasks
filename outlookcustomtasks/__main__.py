@@ -48,20 +48,25 @@ for message in inbox.Items:
         print(f"Found match: \"{message.Subject}\" from [{message.SenderEmailAddress}]({message.SenderName})] at {message.ReceivedTime}")
         matches.append(message)
 
-while True:
-    move_response = input(f"Found {len(matches)} matching emails. Move them to {_settings['target_folder_name']}? (Y/n) [{MOVE_RESPONSE_DEFAULT}]:")
+match_count = len(matches)
 
-    # if response is empty, use default
-    if move_response == "":
-        move_response = MOVE_RESPONSE_DEFAULT
+print(f"Found {match_count} matching emails.")
 
-    if move_response == "Y":
-        print("moving...")
-        move_messages(matches, target_folder)
-        print("moved!")
-        break
-    elif move_response == "n":
-        print("skipping move.")
-        break
-    else:
-        print("Invalid response.")
+if match_count > 0:
+    while True:
+        move_response = input(f"Move {match_count} matching emails to the folder \"{_settings['target_folder_name']}\"? (Y/n) [{MOVE_RESPONSE_DEFAULT}]:")
+
+        # if response is empty, use default
+        if move_response == "":
+            move_response = MOVE_RESPONSE_DEFAULT
+
+        if move_response == "Y":
+            print("moving...")
+            move_messages(matches, target_folder)
+            print("moved!")
+            break
+        elif move_response == "n":
+            print("skipping move.")
+            break
+        else:
+            print("Invalid response.")
