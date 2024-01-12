@@ -22,8 +22,12 @@ _settings = get_settings()
 outlook = win32com.client.Dispatch('Outlook.Application').GetNamespace("MAPI")
 
 def move_messages(messages: List[win32com.client.CDispatch], target_folder: win32com.client.CDispatch):
-    for message in messages:
+    message_count = len(messages)
+    for idx, message in enumerate(messages):
+        print(f"[{idx+1:>{len(str(message_count))}}/{message_count}] Moving email received at {message.ReceivedTime} with subject \"{message.Subject}\" to the folder \"{target_folder.Name}\"... ", end="" ,flush=True)
         message.Move(target_folder)
+        print("✅")
+    print("")
 
 # --------------
 # --- SCRIPT ---
