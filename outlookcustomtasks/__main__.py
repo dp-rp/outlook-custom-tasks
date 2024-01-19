@@ -7,6 +7,7 @@ from pprint import pprint
 from typing import List
 # site
 import win32com.client
+from alive_progress import alive_bar as progressBar
 # package
 from outlookcustomtasks.settings import get_settings
 
@@ -23,10 +24,26 @@ outlook = win32com.client.Dispatch('Outlook.Application').GetNamespace("MAPI")
 
 def move_messages(messages: List[win32com.client.CDispatch], target_folder: win32com.client.CDispatch):
     message_count = len(messages)
-    for idx, message in enumerate(messages):
-        print(f"[{idx+1:>{len(str(message_count))}}/{message_count}] Moving email received at {message.ReceivedTime} with subject \"{message.Subject}\" to the folder \"{target_folder.Name}\"... ", end="" ,flush=True)
-        message.Move(target_folder)
-        print("✅")
+    moved_messages = []
+
+    try:
+        with progressBar(message_count, title="moving emails", bar="filling", stats=True, enrich_print=True) as bar:
+            # count = 0
+            for message in messages:
+                message.Move(target_folder)
+                moved_messages.append(message)
+                # count += 1
+                # if count==20:
+                #     raise RuntimeError("something wrong!")
+                bar()
+        print("")
+    except Exception as e:
+        print("Error: Failed to move all messages!")
+        print(e)
+
+    # print out basic identifying information about all messages that were successfully moved
+    for idx, message in enumerate(moved_messages):
+        print(f"[{idx+1:>{len(str(message_count))}}/{message_count}] Moved email received at {message.ReceivedTime} with subject \"{message.Subject}\" to the folder \"{target_folder.Name}\"")
     print("")
 
 # --------------
@@ -47,12 +64,16 @@ else:
     print(f"Using target folder: \"{target_folder.Name}\"")
 
 matches = []
-for message in inbox.Items:
-    if message.Subject == _settings["subject_to_match"]:
-        print(f"Found match: \"{message.Subject}\" from [{message.SenderEmailAddress}]({message.SenderName})] at {message.ReceivedTime}")
-        matches.append(message)
+with progressBar(len(inbox.Items), title=f"searching for matches", bar="filling", stats=True) as bar:
+    for message in inbox.Items:
+        if message.Subject == _settings["subject_to_match"]:
+            matches.append(message)
+        bar()
 
 match_count = len(matches)
+
+for message in matches:
+    print(f"Found match: \"{message.Subject}\" from [{message.SenderEmailAddress}]({message.SenderName})] at {message.ReceivedTime}")
 
 print(f"Found {match_count} matching emails.")
 
@@ -65,9 +86,7 @@ if match_count > 0:
             move_response = MOVE_RESPONSE_DEFAULT
 
         if move_response == "Y":
-            print("moving...")
             move_messages(matches, target_folder)
-            print("moved!")
             break
         elif move_response == "n":
             print("skipping move.")
