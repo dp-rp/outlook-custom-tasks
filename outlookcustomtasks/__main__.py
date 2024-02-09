@@ -36,7 +36,14 @@ def get_predicates_from_conditions(conditions):
             if "subject_matches" in condition:
                 predicates.append(lambda m: m.Subject == condition["subject_matches"])
                 bar()
-                break
+            elif "subject_starts_with" in condition:
+                predicates.append(lambda m: m.Subject.startswith(condition["subject_starts_with"]))
+                bar()
+            elif "sender_matches" in condition:
+                sender_to_match = condition["sender_matches"]
+                print(condition)
+                predicates.append(lambda m: getattr(m,'SenderEmailAddress',None) == sender_to_match)
+                bar()
             else:
                 raise RuntimeError("unsupported condition!")
     return predicates
@@ -52,7 +59,7 @@ def run_rule(rule):
     match_count = len(matches)
 
     for message in matches:
-        print(f"Found match: \"{message.Subject}\" from [{message.SenderEmailAddress}]({message.SenderName})] at {message.ReceivedTime}")
+        print(f"{Fore.CYAN}Found match:{Style.RESET_ALL} \"{message.Subject}\" from [{message.SenderEmailAddress}]({message.SenderName})] at {message.ReceivedTime}")
 
     print(f"Found {match_count} matching emails.")
     
