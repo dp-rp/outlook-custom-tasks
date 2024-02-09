@@ -4,12 +4,10 @@
 
 # built in
 from pprint import pprint
-from typing import List
 # site
-import win32com.client
-from alive_progress import alive_bar as progressBar
 from colorama import Fore, Style, init as colorama_init
 # package
+from outlookcustomtasks.outlook import OutlookClient
 from outlookcustomtasks.settings import get_settings
 
 # ----------------
@@ -22,58 +20,21 @@ MOVE_RESPONSE_DEFAULT = "n"
 # ---------------------
 colorama_init()
 _settings = get_settings()
-outlook = win32com.client.Dispatch('Outlook.Application').GetNamespace("MAPI")
-
-# ----------------
-# --- FUNCTIONS ---
-# ----------------
-def move_messages(messages: List[win32com.client.CDispatch], target_folder: win32com.client.CDispatch):
-    message_count = len(messages)
-    moved_messages = []
-
-    try:
-        with progressBar(message_count, title="moving emails", bar="filling", stats=True, enrich_print=True) as bar:
-            # count = 0
-            for message in messages:
-                message.Move(target_folder)
-                moved_messages.append(message)
-                # count += 1
-                # if count==20:
-                #     raise RuntimeError("something wrong!")
-                bar()
-        print("")
-    except Exception as e:
-        print("Error: Failed to move all messages!")
-        print(e)
-
-    # print out basic identifying information about all messages that were successfully moved
-    for idx, message in enumerate(moved_messages):
-        print(f"[{idx+1:>{len(str(message_count))}}/{message_count}] Moved email received at {message.ReceivedTime} with subject \"{message.Subject}\" to the folder \"{target_folder.Name}\"")
-    print("")
 
 # -------------
 # --- SCRIPT ---
 # -------------
 
-inbox = outlook.GetDefaultFolder(6)
+olc = OutlookClient()
+inbox = olc.inbox()
+target_folder = olc.folder(_settings["target_folder_name"])
 
-target_folder = None
-for folder in inbox.Folders:
-    if folder.Name == _settings["target_folder_name"]:
-        target_folder = folder
-        break
-
-if not target_folder:
-    raise RuntimeError("Failed to find target folder")
-else:
-    print(f"Using target folder: \"{target_folder.Name}\"")
-
-matches = []
-with progressBar(len(inbox.Items), title=f"searching for matches", bar="filling", stats=True) as bar:
-    for message in inbox.Items:
-        if message.Subject == _settings["subject_to_match"]:
-            matches.append(message)
-        bar()
+matches = olc.find_messages(
+    folder = inbox,
+    filter_by = [
+        lambda m: m.Subject == _settings["subject_to_match"]
+    ]
+)
 
 match_count = len(matches)
 
@@ -91,7 +52,7 @@ if match_count > 0:
             move_response = MOVE_RESPONSE_DEFAULT
 
         if move_response == "Y":
-            move_messages(matches, target_folder)
+            olc.move_messages(matches, target_folder)
             break
         elif move_response == "n":
             print("skipping move.")
