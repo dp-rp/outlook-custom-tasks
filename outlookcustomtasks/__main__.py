@@ -7,6 +7,7 @@ from pprint import pprint
 from collections import Counter
 # site
 from colorama import Fore, Style, init as colorama_init
+from alive_progress import alive_bar as progressBar
 # package
 from outlookcustomtasks.outlook import OutlookClient
 from outlookcustomtasks.settings import get_settings
@@ -21,45 +22,81 @@ MOVE_RESPONSE_DEFAULT = "n"
 # ---------------------
 colorama_init()
 _settings = get_settings()
+olc = OutlookClient()
+
+# ----------------
+# --- FUNCTIONS ---
+# ----------------
+
+def get_predicates_from_conditions(conditions):
+    print("conditions:",conditions)
+    predicates = []
+    with progressBar(len(conditions), title=f"generating predicates", bar="filling", stats=True) as bar:
+        for condition in conditions:
+            if "subject_matches" in condition:
+                predicates.append(lambda m: m.Subject == condition["subject_matches"])
+                bar()
+                break
+            else:
+                raise RuntimeError("unsupported condition!")
+    return predicates
+
+def run_rule(rule):
+    print(f"running rule {Fore.GREEN}'{rule['name']}'{Style.RESET_ALL}...")
+    predicates = get_predicates_from_conditions(rule["conditions"])
+    matches = olc.find_messages(
+        folder=olc.inbox(),
+        filter_by=predicates
+    )
+
+    match_count = len(matches)
+
+    for message in matches:
+        print(f"Found match: \"{message.Subject}\" from [{message.SenderEmailAddress}]({message.SenderName})] at {message.ReceivedTime}")
+
+    print(f"Found {match_count} matching emails.")
+    
+    action_count = len(rule["actions"])
+
+    # HACK(Denver): just a quick way to do things - confirmation prompts should be based on which actions are associated with the given rule
+    # if this rule doesn't have any actions
+    if action_count < 1:
+        print("No actions! Continuing to next rule...")
+    elif action_count == 1:
+        first_action = rule["actions"][0]
+        
+        if "move_to_folder" in first_action:
+            target_folder_name = first_action["move_to_folder"]
+            if match_count > 0:
+                while True:
+                    move_response = input(f"Move {match_count} matching emails to the folder \"{target_folder_name}\"? (Y/n) [{MOVE_RESPONSE_DEFAULT}]:")
+
+                    # if response is empty, use default
+                    if move_response == "":
+                        move_response = MOVE_RESPONSE_DEFAULT
+
+                    if move_response == "Y":
+                        target_folder = olc.folder(target_folder_name)
+                        olc.move_messages(matches, target_folder)
+                        break
+                    elif move_response == "n":
+                        print(f"{Fore.YELLOW}skipping move.{Style.RESET_ALL}")
+                        break
+                    else:
+                        print(f"{Fore.RED}Invalid response.{Style.RESET_ALL} {Fore.YELLOW}(note: input is case-sensitive){Style.RESET_ALL}")
+
+    else:
+        raise NotImplementedError("Multiple actions not yet supported.")
+
 
 # -------------
 # --- SCRIPT ---
 # -------------
 
-olc = OutlookClient()
-inbox = olc.inbox()
-target_folder = olc.folder(_settings["target_folder_name"])
-
-matches = olc.find_messages(
-    folder = inbox,
-    filter_by = [
-        lambda m: m.Subject == _settings["subject_to_match"]
-    ]
-)
-
-match_count = len(matches)
-
-for message in matches:
-    print(f"Found match: \"{message.Subject}\" from [{message.SenderEmailAddress}]({message.SenderName})] at {message.ReceivedTime}")
-
-print(f"Found {match_count} matching emails.")
-
-if match_count > 0:
-    while True:
-        move_response = input(f"Move {match_count} matching emails to the folder \"{_settings['target_folder_name']}\"? (Y/n) [{MOVE_RESPONSE_DEFAULT}]:")
-
-        # if response is empty, use default
-        if move_response == "":
-            move_response = MOVE_RESPONSE_DEFAULT
-
-        if move_response == "Y":
-            olc.move_messages(matches, target_folder)
-            break
-        elif move_response == "n":
-            print(f"{Fore.YELLOW}skipping move.{Style.RESET_ALL}")
-            break
-        else:
-            print(f"{Fore.RED}Invalid response.{Style.RESET_ALL} {Fore.YELLOW}(note: input is case-sensitive){Style.RESET_ALL}")
+# for each rule defined in settings file
+for rule in _settings["rules"]:
+    # run the rule
+    run_rule(rule)
 
 # # FIXME: below is temporary
 # matches = olc.find_messages(
