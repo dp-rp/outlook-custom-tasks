@@ -1,6 +1,6 @@
-# ---------------
+# --------------
 # --- IMPORTS ---
-# ---------------
+# --------------
 
 # built in
 from pprint import pprint
@@ -12,9 +12,9 @@ from colorama import Fore, Style, init as colorama_init
 # package
 from outlookcustomtasks.settings import get_settings
 
-# -----------------
+# ----------------
 # --- CONSTANTS ---
-# -----------------
+# ----------------
 MOVE_RESPONSE_DEFAULT = "n"
 
 # ---------------------
@@ -24,6 +24,9 @@ colorama_init()
 _settings = get_settings()
 outlook = win32com.client.Dispatch('Outlook.Application').GetNamespace("MAPI")
 
+# ----------------
+# --- FUNCTIONS ---
+# ----------------
 def move_messages(messages: List[win32com.client.CDispatch], target_folder: win32com.client.CDispatch):
     message_count = len(messages)
     moved_messages = []
@@ -48,9 +51,9 @@ def move_messages(messages: List[win32com.client.CDispatch], target_folder: win3
         print(f"[{idx+1:>{len(str(message_count))}}/{message_count}] Moved email received at {message.ReceivedTime} with subject \"{message.Subject}\" to the folder \"{target_folder.Name}\"")
     print("")
 
-# --------------
+# -------------
 # --- SCRIPT ---
-# --------------
+# -------------
 
 inbox = outlook.GetDefaultFolder(6)
 
