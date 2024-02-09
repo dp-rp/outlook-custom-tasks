@@ -9,6 +9,7 @@ def get_settings():
             rules = []
             for rule in settings["data"]["rules"]:
                 rules.append({
+                    "name": rule["name"],
                     "conditions": rule["conditions"],
                     "actions": rule["actions"]
                 })
