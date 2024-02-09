@@ -55,7 +55,7 @@ if match_count > 0:
             olc.move_messages(matches, target_folder)
             break
         elif move_response == "n":
-            print("skipping move.")
+            print(f"{Fore.YELLOW}skipping move.{Style.RESET_ALL}")
             break
         else:
             print(f"{Fore.RED}Invalid response.{Style.RESET_ALL} {Fore.YELLOW}(note: input is case-sensitive){Style.RESET_ALL}")
