@@ -1,0 +1,9 @@
+{
+    "version": "1.0.0",
+    "data": {
+        "targetFolderName": "test",
+        "subjectToMatch": "An exact subject line to match!",
+        "subjectStartToMatch": "[Complete]",
+        "senderForSubjectStartMatching": "status@example.com"
+    }
+}
