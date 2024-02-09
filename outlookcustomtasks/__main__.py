@@ -4,6 +4,7 @@
 
 # built in
 from pprint import pprint
+from collections import Counter
 # site
 from colorama import Fore, Style, init as colorama_init
 # package
@@ -120,10 +121,11 @@ senders_sorted_by_message_count = sorted(
 )
 
 for sender in senders_sorted_by_message_count:
-    duplicate_subject_count = 0
-    for message in sender['messages']:
-        message.Subject
-    print(f"{sender['message_count']:<3} :{sender['sender']}")
+    subject_counts = Counter([m.Subject for m in sender["messages"]]).most_common()
 
-test = olc.folder('Complete')
-print(test)
+    # print total message count for sender
+    print(f"({sender['message_count']:<3}): {sender['sender']}")
+
+    # print total messages with same subject from same sender
+    for subject, _count in subject_counts:
+        print(f"  [{_count:<3}] {subject}")
