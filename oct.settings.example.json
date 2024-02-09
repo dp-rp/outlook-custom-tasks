@@ -11,7 +11,7 @@
                 ],
                 "actions": [
                     {
-                        "move_to": "test"
+                        "move_to_folder": "test"
                     }
                 ]
             },
