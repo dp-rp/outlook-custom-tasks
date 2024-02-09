@@ -8,6 +8,7 @@ from typing import List
 # site
 import win32com.client
 from alive_progress import alive_bar as progressBar
+from colorama import Fore, Style, init as colorama_init
 # package
 from outlookcustomtasks.settings import get_settings
 
@@ -19,6 +20,7 @@ MOVE_RESPONSE_DEFAULT = "n"
 # ---------------------
 # --- INITIALIZATION ---
 # ---------------------
+colorama_init()
 _settings = get_settings()
 outlook = win32com.client.Dispatch('Outlook.Application').GetNamespace("MAPI")
 
@@ -92,4 +94,4 @@ if match_count > 0:
             print("skipping move.")
             break
         else:
-            print("Invalid response.")
+            print(f"{Fore.RED}Invalid response.{Style.RESET_ALL} {Fore.YELLOW}(note: input is case-sensitive){Style.RESET_ALL}")
