@@ -3,9 +3,10 @@
     "data": {
         "rules": [
             {
+                "name": "Move messages with the exact subject line 'Specific subject line!' to the folder 'test'",
                 "conditions": [
                     {
-                        "subject_matches": "An exact subject line to match!"
+                        "subject_matches": "Specific subject line!"
                     }
                 ],
                 "actions": [
@@ -15,6 +16,7 @@
                 ]
             },
             {
+                "name": "List all messages from status@example.com where the subject starts with '[Complete]'",
                 "conditions": [
                     {
                         "sender_matches": "status@example.com"
