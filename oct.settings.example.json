@@ -1,9 +1,30 @@
 {
     "version": "1.0.0",
     "data": {
-        "targetFolderName": "test",
-        "subjectToMatch": "An exact subject line to match!",
-        "subjectStartToMatch": "[Complete]",
-        "senderForSubjectStartMatching": "status@example.com"
+        "rules": [
+            {
+                "conditions": [
+                    {
+                        "subject_matches": "An exact subject line to match!"
+                    }
+                ],
+                "actions": [
+                    {
+                        "move_to": "test"
+                    }
+                ]
+            },
+            {
+                "conditions": [
+                    {
+                        "sender_matches": "status@example.com"
+                    },
+                    {
+                        "subject_starts_with": "[Complete]"
+                    }
+                ],
+                "actions": []
+            }
+        ]
     }
 }
