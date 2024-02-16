@@ -1,0 +1,36 @@
+{
+    "version": "1.0.0",
+    "data": {
+        "rules": [
+            {
+                "name": "Move messages with the exact subject line 'Specific subject line!' to the folder 'test'",
+                "conditions": [
+                    {
+                        "subject_matches": "Specific subject line!"
+                    }
+                ],
+                "actions": [
+                    {
+                        "move_to_folder": "test"
+                    }
+                ]
+            },
+            {
+                "name": "List all messages from status@example.com where the subject starts with '[Complete]'",
+                "conditions": [
+                    {
+                        "sender_matches": "status@example.com"
+                    },
+                    {
+                        "subject_starts_with": "[Complete]"
+                    }
+                ],
+                "actions": [
+                    {
+                        "basic_analytics": {}
+                    }
+                ]
+            }
+        ]
+    }
+}
