@@ -9,7 +9,7 @@ from collections import Counter
 from colorama import Fore, Style, init as colorama_init
 from alive_progress import alive_bar as progressBar
 # package
-from outlookcustomtasks.outlook import OutlookClient
+from outlookcustomtasks.outlook import OutlookClient, conditions as cond
 from outlookcustomtasks.settings import get_settings
 
 # ----------------
@@ -50,17 +50,21 @@ def get_predicates_from_conditions(conditions):
 
 def run_rule(rule):
     print(f"running rule {Fore.GREEN}'{rule['name']}'{Style.RESET_ALL}...")
+    # gen predicates based on conditions in config
     predicates = get_predicates_from_conditions(rule["conditions"])
+
+    # find message matches using predicates
     matches = olc.find_messages(
         folder=olc.inbox(),
         filter_by=predicates
     )
 
-    match_count = len(matches)
-
+    # print out basic information about each match
     for message in matches:
         print(f"{Fore.CYAN}Found match:{Style.RESET_ALL} \"{message.Subject}\" from [{message.SenderEmailAddress}]({message.SenderName})] at {message.ReceivedTime}")
 
+    # print number of matches found
+    match_count = len(matches)
     print(f"Found {match_count} matching emails.")
     
     action_count = len(rule["actions"])
@@ -91,7 +95,6 @@ def run_rule(rule):
                         break
                     else:
                         print(f"{Fore.RED}Invalid response.{Style.RESET_ALL} {Fore.YELLOW}(note: input is case-sensitive){Style.RESET_ALL}")
-
     else:
         raise NotImplementedError("Multiple actions not yet supported.")
 
@@ -130,7 +133,10 @@ for rule in _settings["rules"]:
 # collected_messages += first_level_subfolder_messages
 # print(len(collected_messages))
 
+# TODO(Denver): for stuff below, adapt any not already adapted logic to the "run_rule" flow so it can be
+# ... defined in the config instead of in code
 
+# TODO(Denver): make this it's own function
 grouped_by_sender = {}
 for message in olc.inbox().Items:
     try:
@@ -178,8 +184,8 @@ for sender in senders_sorted_by_message_count:
 messages_from_sender = olc.find_messages(
     folder=olc.inbox(),
     filter_by=[
-        lambda m: getattr(m,'SenderEmailAddress',None) == _settings["sender_for_subject_start_matching"],
-        lambda m: m.Subject.startswith(_settings["subject_start_to_match"])
+        cond.is_sender_email_address(_settings["sender_for_subject_start_matching"]),
+        cond.subject_starts_with(_settings["subject_start_to_match"])
     ]
 )
 
