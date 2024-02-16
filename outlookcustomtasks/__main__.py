@@ -98,6 +98,26 @@ def run_rule(rule):
     else:
         raise NotImplementedError("Multiple actions not yet supported.")
 
+def group_by_sender_email_address(messages):
+    grouped_by_sender = {}
+
+    for message in messages:
+        try:
+            # try to get sender's email address
+            sender_email_address = message.SenderEmailAddress
+
+            # if no emails from sender yet
+            if not sender_email_address in grouped_by_sender:
+                # create empty array for sender messages
+                grouped_by_sender[sender_email_address] = []
+
+            # put message in group of other messages from same sender
+            grouped_by_sender[message.SenderEmailAddress].append(message)
+
+        except:
+            print(f"{Fore.YELLOW}Warning: unknown sender email address for message with subject \"{message.Subject}\"{Style.RESET_ALL}")
+
+    return grouped_by_sender
 
 # -------------
 # --- SCRIPT ---
@@ -137,26 +157,17 @@ for rule in _settings["rules"]:
 # ... defined in the config instead of in code
 
 # TODO(Denver): make this it's own function
-grouped_by_sender = {}
-for message in olc.inbox().Items:
-    try:
-        sender_email_address = message.SenderEmailAddress
+sender_grouped_messages = group_by_sender_email_address(olc.inbox().Items)
 
-        if not sender_email_address in grouped_by_sender:
-            grouped_by_sender[sender_email_address] = []
-        
-        grouped_by_sender[message.SenderEmailAddress].append(message)
-
-    except:
-        print(f"{Fore.YELLOW}Warning: unknown sender email address for message with subject \"{message.Subject}\"{Style.RESET_ALL}")
-
-senders = []
-for sender, sender_messages in grouped_by_sender.items():
-    senders.append({
+senders = [
+    {
         "sender": sender,
         "messages": sender_messages,
         "message_count": len(sender_messages)
-    })
+    }
+    for sender, sender_messages
+    in sender_grouped_messages.items()
+]
 
 # filter out senders without at least 3 messages
 senders_at_least_3_messages = filter(
