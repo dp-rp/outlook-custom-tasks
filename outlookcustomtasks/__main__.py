@@ -157,27 +157,23 @@ for rule in _settings["rules"]:
 # ... defined in the config instead of in code
 
 # TODO(Denver): make this it's own function
-sender_grouped_messages = group_by_sender_email_address(olc.inbox().Items)
+messages_grouped_by_sender = group_by_sender_email_address(olc.inbox().Items)
 
 senders = [
     {
-        "sender": sender,
+        "email_address": sender_email_address,
         "messages": sender_messages,
         "message_count": len(sender_messages)
     }
-    for sender, sender_messages
-    in sender_grouped_messages.items()
+    for sender_email_address, sender_messages
+    in messages_grouped_by_sender.items()
+    # filter out senders without at least 3 messages
+    if len(sender_messages) >= 3
 ]
-
-# filter out senders without at least 3 messages
-senders_at_least_3_messages = filter(
-    lambda sender: sender["message_count"] >= 3,
-    senders
-)
 
 # sort sender list by number of messages received
 senders_sorted_by_message_count = sorted(
-    senders_at_least_3_messages,
+    senders,
     key=lambda sender: sender["message_count"],
 )
 
