@@ -25,7 +25,11 @@
                         "subject_starts_with": "[Complete]"
                     }
                 ],
-                "actions": []
+                "actions": [
+                    {
+                        "basic_analytics": {}
+                    }
+                ]
             }
         ]
     }
