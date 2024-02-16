@@ -181,6 +181,7 @@ senders_sorted_by_message_count = sorted(
     key=lambda sender: sender["message_count"],
 )
 
+# for each sender
 for sender in senders_sorted_by_message_count:
     subject_counts = Counter([m.Subject for m in sender["messages"]]).most_common()
 
@@ -190,15 +191,3 @@ for sender in senders_sorted_by_message_count:
     # print total messages with same subject from same sender
     for subject, _count in subject_counts:
         print(f"  [{_count:<3}] {subject}")
-
-# find all messages from given sender where the subject starts with the given string
-messages_from_sender = olc.find_messages(
-    folder=olc.inbox(),
-    filter_by=[
-        cond.is_sender_email_address(_settings["sender_for_subject_start_matching"]),
-        cond.subject_starts_with(_settings["subject_start_to_match"])
-    ]
-)
-
-for m in messages_from_sender:
-    print(m.subject)
