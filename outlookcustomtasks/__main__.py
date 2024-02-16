@@ -128,6 +128,8 @@ def get_sender_email_address(message):
 # -------------
 
 # for each rule defined in settings file
+if len(_settings["rules"]) < 1:
+    print(f"{Fore.YELLOW}Warning: No OCT rules defined!{Style.RESET_ALL}")
 for rule in _settings["rules"]:
     # run the rule
     run_rule(rule)
