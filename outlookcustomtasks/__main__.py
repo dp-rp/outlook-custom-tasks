@@ -40,9 +40,10 @@ def get_predicates_from_conditions(conditions):
                 predicates.append(lambda m: m.Subject.startswith(condition["subject_starts_with"]))
                 bar()
             elif "sender_matches" in condition:
-                sender_to_match = condition["sender_matches"]
-                print(condition)
-                predicates.append(lambda m: getattr(m,'SenderEmailAddress',None) == sender_to_match)
+                def sender_matches(sender_to_match):
+                    return lambda m: get_sender_email_address(m) == sender_to_match
+                
+                predicates.append(sender_matches(condition["sender_matches"]))
                 bar()
             else:
                 raise RuntimeError("unsupported condition!")
@@ -60,8 +61,8 @@ def run_rule(rule):
     )
 
     # print out basic information about each match
-    for message in matches:
-        print(f"{Fore.CYAN}Found match:{Style.RESET_ALL} \"{message.Subject}\" from [{message.SenderEmailAddress}]({message.SenderName})] at {message.ReceivedTime}")
+    for m in matches:
+        print(f"{Fore.CYAN}Found match:{Style.RESET_ALL} \"{m.Subject}\" from [{get_sender_email_address(m)}]({m.SenderName})] at {m.ReceivedTime}")
 
     # print number of matches found
     match_count = len(matches)
@@ -102,22 +103,25 @@ def group_by_sender_email_address(messages):
     grouped_by_sender = {}
 
     for message in messages:
-        try:
-            # try to get sender's email address
-            sender_email_address = message.SenderEmailAddress
+        # get sender's email address
+        sender_email_address = get_sender_email_address(message)
 
-            # if no emails from sender yet
-            if not sender_email_address in grouped_by_sender:
-                # create empty array for sender messages
-                grouped_by_sender[sender_email_address] = []
+        # if no emails from sender yet
+        if not sender_email_address in grouped_by_sender:
+            # create empty array for sender messages
+            grouped_by_sender[sender_email_address] = []
 
-            # put message in group of other messages from same sender
-            grouped_by_sender[message.SenderEmailAddress].append(message)
-
-        except:
-            print(f"{Fore.YELLOW}Warning: unknown sender email address for message with subject \"{message.Subject}\"{Style.RESET_ALL}")
+        # put message in group of other messages from same sender
+        grouped_by_sender[sender_email_address].append(message)
 
     return grouped_by_sender
+
+def get_sender_email_address(message):
+    try:
+        return message.SenderEmailAddress
+    except:
+        print(f"{Fore.YELLOW}Warning: unknown sender email address for message with subject \"{message.Subject}\"{Style.RESET_ALL}")
+        return None
 
 # -------------
 # --- SCRIPT ---
@@ -139,7 +143,7 @@ for rule in _settings["rules"]:
 # match_count = len(matches)
 
 # for message in matches:
-#     print(f"Found match: \"{message.Subject}\" from [{message.SenderEmailAddress}]({message.SenderName})] at {message.ReceivedTime}")
+#     print(f"Found match: \"{message.Subject}\" from [{get_sender_email_address(m)}]({message.SenderName})] at {message.ReceivedTime}")
 
 # print(f"Found {match_count} matching emails.")
 
