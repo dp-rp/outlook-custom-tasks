@@ -181,7 +181,7 @@ for sender in senders_sorted_by_message_count:
     subject_counts = Counter([m.Subject for m in sender["messages"]]).most_common()
 
     # print total message count for sender
-    print(f"({sender['message_count']:<3}): {sender['sender']}")
+    print(f"({sender['message_count']:<3}): {sender['email_address']}")
 
     # print total messages with same subject from same sender
     for subject, _count in subject_counts:
