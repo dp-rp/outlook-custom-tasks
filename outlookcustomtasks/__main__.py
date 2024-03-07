@@ -218,6 +218,9 @@ def run_rule(rule):
                 print()
                 
             elif "sender_analytics" in first_action:
+                # HACK: just a quick dirty implementation
+                print("\n----[ Sender Analytics ]----\n")
+
                 LIMIT = 20
 
                 # HACK: just a quick hacky way to do this
