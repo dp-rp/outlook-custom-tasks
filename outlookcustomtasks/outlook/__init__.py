@@ -14,25 +14,23 @@ class OutlookClient:
             self._inbox = self._outlook.GetDefaultFolder(6)
         return self._inbox
     
+    def _get_subfolders_recursively(self, folder: win32com.client.CDispatch, acc: List[win32com.client.CDispatch]):
+        # for each subfolder (might be an empty list)
+        for subfolder in list(folder.Folders):
+            # get any subfolder subfolders
+            acc = self._get_subfolders_recursively(subfolder,acc)
+
+        # add this folder to acc (whether it has subfolders or not)
+        acc.append(folder)
+
+        return acc
+
     def inbox_folders_recursive_flat(self) -> List[win32com.client.CDispatch]:
         if self._inbox is None:
             self._inbox = self._outlook.GetDefaultFolder(6)
-
-        def get_subfolders_recursively(folder: win32com.client.CDispatch, acc: List[win32com.client.CDispatch]):
-            # print(folder.Name)
-            # for each subfolder (might be an empty list)
-            for subfolder in list(folder.Folders):
-                # print(f"adding subfolders of {folder.Name} to acc")
-                # get any subfolder subfolders
-                acc = get_subfolders_recursively(subfolder,acc)
-
-            # add this folder to acc (whether it has subfolders or not)
-            acc.append(folder)
-
-            return acc
         
-        _inbox_folders_recursive_flat = get_subfolders_recursively(self._inbox,[])
-        
+        _inbox_folders_recursive_flat = self._get_subfolders_recursively(self._inbox, [])
+
         return _inbox_folders_recursive_flat
  
     def folder(self, target_folder_name):
