@@ -53,7 +53,10 @@ class OutlookClient:
                 for idx, message in enumerate(folder.Items):
                     # update progress bar title
                     bar.title(f"searching for matches in '{folder.Name}' ({idx:>{folder_item_count_chars}}/{folder_item_count})")
+
+                    # assume match until proven otherwise
                     is_match = True
+
                     # for each predicate
                     for _filter in filter_by:
                         # if any predicates aren't satisfied
