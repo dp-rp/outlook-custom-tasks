@@ -58,6 +58,44 @@ def get_real_folder_idx(target_folder_name,folders):
         return None
 
 
+def get_folders_from_targets(targets):
+    all_folders = olc.inbox_folders_recursive_flat() # HACK: grabs all folders recursively up front even if while iterating through targets we've already got all the ones we need
+    target_folders = []
+
+    # for each target
+    for idx, target in enumerate(targets):
+        target_folder_name = target['folder_name']
+        recursive = target['recursive']
+        # FIXME: will just grab the first one it sees if any folders share names
+        # try to find real folder with target folder name
+        folder_idx = get_real_folder_idx(target_folder_name, all_folders)
+        # if target_folder_name didn't match any real folder's names
+        if folder_idx is None:
+            raise Exception(f"Failed to find any folders with the name '{target_folder_name}'")
+            
+        # TODO: do stuff when matched
+        if recursive is True:
+            # target_folders.append(olc._get_subfolders_recursively(initial_folder_match))
+            # TODO: handle recursive targets
+            raise NotImplementedError("TODO")
+        elif recursive is False:
+            target_folders.append(all_folders[folder_idx])
+        else:
+            raise Exception("target being recursive must be true or false")
+
+    # for each real folder
+    # for folder in all_folders:
+    #     target = targets.find(folder.name)
+    #     # if the real folder name matches a target folder name
+    #     if folder.Name in target_folder_names:
+    #         # if the target IS recursive
+    #         if targets[]
+    #         # if the target ISN'T recursive
+    #         target_folders.append(folder)
+    
+    return target_folders
+
+
 def run_rule(rule):
     print(f"running rule {Fore.GREEN}'{rule['name']}'{Style.RESET_ALL}...")
     # gen predicates based on conditions in config
