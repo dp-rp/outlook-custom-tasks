@@ -101,9 +101,12 @@ def run_rule(rule):
     # gen predicates based on conditions in config
     predicates = get_predicates_from_conditions(rule["conditions"])
 
+    # collect targets to search for messages in
+    folders = get_folders_from_targets(rule["targets"])
+
     # find message matches using predicates
     matches = olc.find_messages(
-        folder=olc.inbox(),
+        folders=folders,
         filter_by=predicates
     )
 
