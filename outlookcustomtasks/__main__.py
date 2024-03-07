@@ -69,17 +69,17 @@ def get_folders_from_targets(targets):
         # FIXME: will just grab the first one it sees if any folders share names
         # try to find real folder with target folder name
         folder_idx = get_real_folder_idx(target_folder_name, all_folders)
+
         # if target_folder_name didn't match any real folder's names
         if folder_idx is None:
             raise Exception(f"Failed to find any folders with the name '{target_folder_name}'")
-            
-        # TODO: do stuff when matched
+
+        # when matching folder found
+        matching_folder = all_folders[folder_idx]
         if recursive is True:
-            # target_folders.append(olc._get_subfolders_recursively(initial_folder_match))
-            # TODO: handle recursive targets
-            raise NotImplementedError("TODO")
+            target_folders.extend(olc._get_subfolders_recursively(matching_folder,[]))
         elif recursive is False:
-            target_folders.append(all_folders[folder_idx])
+            target_folders.append(matching_folder)
         else:
             raise Exception("target being recursive must be true or false")
 
