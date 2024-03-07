@@ -83,16 +83,6 @@ def get_folders_from_targets(targets):
         else:
             raise Exception("target being recursive must be true or false")
 
-    # for each real folder
-    # for folder in all_folders:
-    #     target = targets.find(folder.name)
-    #     # if the real folder name matches a target folder name
-    #     if folder.Name in target_folder_names:
-    #         # if the target IS recursive
-    #         if targets[]
-    #         # if the target ISN'T recursive
-    #         target_folders.append(folder)
-    
     return target_folders
 
 
