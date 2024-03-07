@@ -215,6 +215,33 @@ def run_rule(rule):
                     
                 print()
                 
+            elif "sender_analytics" in first_action:
+                LIMIT = 20
+
+                # HACK: just a quick hacky way to do this
+                messages_grouped_by_sender_email_address = [
+                    {'sender_email_address': sender_email_address, 'sender_messages': sender_messages, 'sender_message_count': len(sender_messages)}
+                    for sender_email_address, sender_messages
+                    in group_by_sender_email_address(matches).items()
+                ]
+                sender_email_addresses_by_sent = sorted(
+                    messages_grouped_by_sender_email_address,
+                    key=lambda sender: sender['sender_message_count'],
+                    reverse=True
+                )
+
+                top_senders = sender_email_addresses_by_sent[:LIMIT]
+
+                print(f"\n{Fore.BLACK}{Back.GREEN} Top {LIMIT} (or less) offenders for senders that sent the most messages: {Style.RESET_ALL}\n")
+
+                highest_message_count_chars = len(str(top_senders[0]['sender_message_count']))
+                # HACK: sorry, lol
+                longest_sender_name_chars = len(max(top_senders, key=lambda s: len(s['sender_email_address']))['sender_email_address'])
+                for sender_group in top_senders:
+                    print(f"[ {Fore.LIGHTRED_EX}{sender_group['sender_message_count']:>{highest_message_count_chars}}{Style.RESET_ALL} ] [ {Fore.CYAN}{sender_group['sender_email_address']:<{longest_sender_name_chars}}{Style.RESET_ALL} ]")
+
+                print()
+                
             else:
                 raise Exception(f"No supported OCT action names were found in defined actions")
                 
