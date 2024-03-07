@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "outlookcustomtasks"
-version = "0.1.0"
+version = "0.2.0"
 description = ""
 authors = ["dp-rp <155602873+dp-rp@users.noreply.github.com>"]
 license = "MIT"
