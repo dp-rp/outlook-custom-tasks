@@ -51,27 +51,30 @@ class OutlookClient:
     
     def find_messages(self, folders, filter_by):
         matches = []
-        with progressBar(len(folders), title=f"searching for matches", bar="filling", stats=True) as folders_bar:
+        total_message_count = sum([len(f.Items) for f in folders])
+        with progressBar(total_message_count, title=f"searching for matches", bar="filling", stats=True) as bar:
             for folder in folders:
-                with progressBar(len(folder.Items), title=f"searching for matches in '{folder}'", bar="filling", stats=True) as folder_bar:
-                    # for each message
-                    for message in folder.Items:
-                        is_match = True
-                        # for each predicate
-                        for _filter in filter_by:
-                            # if any predicates aren't satisfied
-                            if not _filter(message):
-                                # mark message as not a match
-                                is_match = False
-                                # skip any other predicates to check
-                                break
+                folder_item_count = len(folder.Items)
+                folder_item_count_chars = len(str(folder_item_count))
+                # for each message
+                for idx, message in enumerate(folder.Items):
+                    # update progress bar title
+                    bar.title(f"searching for matches in '{folder.Name}' ({idx:>{folder_item_count_chars}}/{folder_item_count})")
+                    is_match = True
+                    # for each predicate
+                    for _filter in filter_by:
+                        # if any predicates aren't satisfied
+                        if not _filter(message):
+                            # mark message as not a match
+                            is_match = False
+                            # skip any other predicates to check
+                            break
 
-                        if is_match:
-                            matches.append(message)
+                    if is_match:
+                        matches.append(message)
 
-                        folder_bar()
-                folders_bar()
-        
+                    bar()
+
         return matches
 
     def move_messages(self, messages: List[win32com.client.CDispatch], target_folder: win32com.client.CDispatch):
