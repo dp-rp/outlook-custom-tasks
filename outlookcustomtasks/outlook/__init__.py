@@ -49,25 +49,28 @@ class OutlookClient:
 
         return target_folder
     
-    def find_messages(self, folder, filter_by):
+    def find_messages(self, folders, filter_by):
         matches = []
-        with progressBar(len(folder.Items), title=f"searching for matches", bar="filling", stats=True) as bar:
-            # for each message
-            for message in folder.Items:
-                is_match = True
-                # for each predicate
-                for _filter in filter_by:
-                    # if any predicates aren't satisfied
-                    if not _filter(message):
-                        # mark message as not a match
-                        is_match = False
-                        # skip any other predicates to check
-                        break
-                    
-                if is_match:
-                    matches.append(message)
+        with progressBar(len(folders), title=f"searching for matches", bar="filling", stats=True) as folders_bar:
+            for folder in folders:
+                with progressBar(len(folder.Items), title=f"searching for matches in '{folder}'", bar="filling", stats=True) as folder_bar:
+                    # for each message
+                    for message in folder.Items:
+                        is_match = True
+                        # for each predicate
+                        for _filter in filter_by:
+                            # if any predicates aren't satisfied
+                            if not _filter(message):
+                                # mark message as not a match
+                                is_match = False
+                                # skip any other predicates to check
+                                break
 
-                bar()
+                        if is_match:
+                            matches.append(message)
+
+                        folder_bar()
+                folders_bar()
         
         return matches
 
