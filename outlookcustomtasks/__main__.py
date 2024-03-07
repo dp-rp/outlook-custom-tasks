@@ -58,8 +58,7 @@ def get_real_folder_idx(target_folder_name,folders):
         return None
 
 
-def get_folders_from_targets(targets):
-    all_folders = olc.inbox_folders_recursive_flat() # HACK: grabs all folders recursively up front even if while iterating through targets we've already got all the ones we need
+def get_folders_from_targets(targets, folders):
     target_folders = []
 
     # for each target
@@ -68,14 +67,14 @@ def get_folders_from_targets(targets):
         recursive = target['recursive']
         # FIXME: will just grab the first one it sees if any folders share names
         # try to find real folder with target folder name
-        folder_idx = get_real_folder_idx(target_folder_name, all_folders)
+        folder_idx = get_real_folder_idx(target_folder_name, folders)
 
         # if target_folder_name didn't match any real folder's names
         if folder_idx is None:
             raise Exception(f"Failed to find any folders with the name '{target_folder_name}'")
 
         # when matching folder found
-        matching_folder = all_folders[folder_idx]
+        matching_folder = folders[folder_idx]
         if recursive is True:
             target_folders.extend(olc._get_subfolders_recursively(matching_folder,[]))
         elif recursive is False:
@@ -86,13 +85,16 @@ def get_folders_from_targets(targets):
     return target_folders
 
 
-def run_rule(rule):
+def run_rule(rule, all_folders):
     print(f"running rule {Fore.GREEN}'{rule['name']}'{Style.RESET_ALL}...")
     # gen predicates based on conditions in config
     predicates = get_predicates_from_conditions(rule["conditions"])
 
     # collect targets to search for messages in
-    folders = get_folders_from_targets(rule["targets"])
+    folders = get_folders_from_targets(
+        targets=rule["targets"],
+        folders=all_folders
+    )
 
     # find message matches using predicates
     matches = olc.find_messages(
@@ -302,9 +304,14 @@ def get_sender_email_address(message):
 # for each rule defined in settings file
 if len(_settings["rules"]) < 1:
     print(f"{Fore.YELLOW}Warning: No OCT rules defined!{Style.RESET_ALL}")
+
+# HACK: grabs all folders recursively up front even if we don't need them all
+# ...  (only an issue if there is a significantly large number of folders)
+all_folders = olc.inbox_folders_recursive_flat()
+
 for rule in _settings["rules"]:
     # run the rule
-    run_rule(rule)
+    run_rule(rule, all_folders)
 
 # # FIXME: below is temporary
 # matches = olc.find_messages(
