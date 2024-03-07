@@ -299,6 +299,8 @@ def group_by_subject(messages):
 def get_sender_email_address(message):
     try:
         return message.SenderEmailAddress
+    except KeyboardInterrupt:
+        raise KeyboardInterrupt
     except:
         print(f"{Fore.YELLOW}Warning: unknown sender email address for message with subject \"{message.Subject}\"{Style.RESET_ALL}")
         return None
