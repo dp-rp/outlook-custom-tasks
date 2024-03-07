@@ -110,9 +110,11 @@ def run_rule(rule):
         filter_by=predicates
     )
 
-    # print out basic information about each match
-    for m in matches:
-        print(f"{Fore.CYAN}Found match:{Style.RESET_ALL} \"{m.Subject}\" from [{get_sender_email_address(m)}]({m.SenderName})] at {m.ReceivedTime}")
+    # if at least one condition was specified
+    if len(rule["conditions"]) > 0:
+        # print out basic information about each match
+        for m in matches:
+            print(f"{Fore.CYAN}Found match:{Style.RESET_ALL} \"{m.Subject}\" from [{get_sender_email_address(m)}]({m.SenderName})] at {m.ReceivedTime}")
 
     # print number of matches found
     match_count = len(matches)
