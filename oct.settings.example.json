@@ -30,6 +30,21 @@
                         "basic_analytics": {}
                     }
                 ]
+            },
+            {
+                "name": "List total message count per sender",
+                "targets": [
+                    {
+                        "folder_name": "Inbox",
+                        "recursive": true
+                    }
+                ],
+                "conditions": [],
+                "actions": [
+                    {
+                        "sender_analytics": {}
+                    }
+                ]
             }
         ]
     }

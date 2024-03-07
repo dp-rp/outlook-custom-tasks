@@ -50,20 +50,63 @@ def get_predicates_from_conditions(conditions):
                 raise RuntimeError("unsupported OCT condition!")
     return predicates
 
-def run_rule(rule):
+def get_real_folder_idx(target_folder_name,folders):
+    for idx, folder in enumerate(folders):
+        if folder.Name == target_folder_name:
+            return idx
+    else:
+        return None
+
+
+def get_folders_from_targets(targets, folders):
+    target_folders = []
+
+    # for each target
+    for idx, target in enumerate(targets):
+        target_folder_name = target['folder_name']
+        recursive = target['recursive']
+        # FIXME: will just grab the first one it sees if any folders share names
+        # try to find real folder with target folder name
+        folder_idx = get_real_folder_idx(target_folder_name, folders)
+
+        # if target_folder_name didn't match any real folder's names
+        if folder_idx is None:
+            raise Exception(f"Failed to find any folders with the name '{target_folder_name}'")
+
+        # when matching folder found
+        matching_folder = folders[folder_idx]
+        if recursive is True:
+            target_folders.extend(olc._get_subfolders_recursively(matching_folder,[]))
+        elif recursive is False:
+            target_folders.append(matching_folder)
+        else:
+            raise Exception("target being recursive must be true or false")
+
+    return target_folders
+
+
+def run_rule(rule, all_folders):
     print(f"running rule {Fore.GREEN}'{rule['name']}'{Style.RESET_ALL}...")
     # gen predicates based on conditions in config
     predicates = get_predicates_from_conditions(rule["conditions"])
 
+    # collect targets to search for messages in
+    folders = get_folders_from_targets(
+        targets=rule["targets"],
+        folders=all_folders
+    )
+
     # find message matches using predicates
     matches = olc.find_messages(
-        folder=olc.inbox(),
+        folders=folders,
         filter_by=predicates
     )
 
-    # print out basic information about each match
-    for m in matches:
-        print(f"{Fore.CYAN}Found match:{Style.RESET_ALL} \"{m.Subject}\" from [{get_sender_email_address(m)}]({m.SenderName})] at {m.ReceivedTime}")
+    # if at least one condition was specified
+    if len(rule["conditions"]) > 0:
+        # print out basic information about each match
+        for m in matches:
+            print(f"{Fore.CYAN}Found match:{Style.RESET_ALL} \"{m.Subject}\" from [{get_sender_email_address(m)}]({m.SenderName})] at {m.ReceivedTime}")
 
     # print number of matches found
     match_count = len(matches)
@@ -166,6 +209,36 @@ def run_rule(rule):
                     
                 print()
                 
+            elif "sender_analytics" in first_action:
+                # HACK: just a quick dirty implementation
+                print("\n----[ Sender Analytics ]----\n")
+
+                LIMIT = 20
+
+                # HACK: just a quick hacky way to do this
+                messages_grouped_by_sender_email_address = [
+                    {'sender_email_address': sender_email_address, 'sender_messages': sender_messages, 'sender_message_count': len(sender_messages)}
+                    for sender_email_address, sender_messages
+                    in group_by_sender_email_address(matches).items()
+                ]
+                sender_email_addresses_by_sent = sorted(
+                    messages_grouped_by_sender_email_address,
+                    key=lambda sender: sender['sender_message_count'],
+                    reverse=True
+                )
+
+                top_senders = sender_email_addresses_by_sent[:LIMIT]
+
+                print(f"\n{Fore.BLACK}{Back.GREEN} Top {LIMIT} (or less) offenders for senders that sent the most messages: {Style.RESET_ALL}\n")
+
+                highest_message_count_chars = len(str(top_senders[0]['sender_message_count']))
+                # HACK: sorry, lol
+                longest_sender_name_chars = len(max(top_senders, key=lambda s: len(s['sender_email_address']))['sender_email_address'])
+                for sender_group in top_senders:
+                    print(f"[ {Fore.LIGHTRED_EX}{sender_group['sender_message_count']:>{highest_message_count_chars}}{Style.RESET_ALL} ] [ {Fore.CYAN}{sender_group['sender_email_address']:<{longest_sender_name_chars}}{Style.RESET_ALL} ]")
+
+                print()
+                
             else:
                 raise Exception(f"No supported OCT action names were found in defined actions")
                 
@@ -218,6 +291,8 @@ def group_by_subject(messages):
 def get_sender_email_address(message):
     try:
         return message.SenderEmailAddress
+    except KeyboardInterrupt:
+        raise KeyboardInterrupt
     except:
         print(f"{Fore.YELLOW}Warning: unknown sender email address for message with subject \"{message.Subject}\"{Style.RESET_ALL}")
         return None
@@ -229,9 +304,14 @@ def get_sender_email_address(message):
 # for each rule defined in settings file
 if len(_settings["rules"]) < 1:
     print(f"{Fore.YELLOW}Warning: No OCT rules defined!{Style.RESET_ALL}")
+
+# HACK: grabs all folders recursively up front even if we don't need them all
+# ...  (only an issue if there is a significantly large number of folders)
+all_folders = olc.inbox_folders_recursive_flat()
+
 for rule in _settings["rules"]:
     # run the rule
-    run_rule(rule)
+    run_rule(rule, all_folders)
 
 # # FIXME: below is temporary
 # matches = olc.find_messages(
