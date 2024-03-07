@@ -26,10 +26,7 @@ class OutlookClient:
         return acc
 
     def inbox_folders_recursive_flat(self) -> List[win32com.client.CDispatch]:
-        if self._inbox is None:
-            self._inbox = self._outlook.GetDefaultFolder(6)
-        
-        _inbox_folders_recursive_flat = self._get_subfolders_recursively(self._inbox, [])
+        _inbox_folders_recursive_flat = self._get_subfolders_recursively(self.inbox(), [])
 
         return _inbox_folders_recursive_flat
  
