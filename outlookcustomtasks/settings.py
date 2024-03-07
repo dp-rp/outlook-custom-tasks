@@ -7,9 +7,11 @@ def get_settings():
         settings = json.load(f)
         if settings["version"] == "1.0.0":
             rules = []
+            DEFAULT_TARGETS = [{"folder_name": "Inbox", "recursive": False}]
             for rule in settings["data"]["rules"]:
                 rules.append({
                     "name": rule["name"],
+                    "targets": rule["targets"] if "targets" in rule else DEFAULT_TARGETS,
                     "conditions": rule["conditions"],
                     "actions": rule["actions"]
                 })
