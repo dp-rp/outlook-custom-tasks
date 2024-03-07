@@ -50,6 +50,14 @@ def get_predicates_from_conditions(conditions):
                 raise RuntimeError("unsupported OCT condition!")
     return predicates
 
+def get_real_folder_idx(target_folder_name,folders):
+    for idx, folder in enumerate(folders):
+        if folder.Name == target_folder_name:
+            return idx
+    else:
+        return None
+
+
 def run_rule(rule):
     print(f"running rule {Fore.GREEN}'{rule['name']}'{Style.RESET_ALL}...")
     # gen predicates based on conditions in config
