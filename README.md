@@ -10,6 +10,7 @@
 - [Troubleshooting](#%74%72%6F%75%62%6C%65%73%68%6F%6F%74%69%6E%67)
   - [Everything suddenly slower when running rules??](#%65%76%65%72%79%74%68%69%6E%67%2D%73%75%64%64%65%6E%6C%79%2D%73%6C%6F%77%65%72%2D%77%68%65%6E%2D%72%75%6E%6E%69%6E%67%2D%72%75%6C%65%73%3F%3F)
   - [Error: _"UnicodeEncodeError: 'charmap' codec can't encode characters in position 1-40: character maps to \<undefined\>"_](#%65%72%72%6F%72%3A%2D%5F%22%75%6E%69%63%6F%64%65%65%6E%63%6F%64%65%65%72%72%6F%72%3A%2D%27%63%68%61%72%6D%61%70%27%2D%63%6F%64%65%63%2D%63%61%6E%27%74%2D%65%6E%63%6F%64%65%2D%63%68%61%72%61%63%74%65%72%73%2D%69%6E%2D%70%6F%73%69%74%69%6F%6E%2D%31%2D%34%30%3A%2D%63%68%61%72%61%63%74%65%72%2D%6D%61%70%73%2D%74%6F%2D%5C%3C%75%6E%64%65%66%69%6E%65%64%5C%3E%22%5F)
+  - [Error: _"RuntimeError: Failed to connect to Outlook locally"_](#%65%72%72%6F%72%3A%2D%5F%22%72%75%6E%74%69%6D%65%65%72%72%6F%72%3A%2D%66%61%69%6C%65%64%2D%74%6F%2D%63%6F%6E%6E%65%63%74%2D%74%6F%2D%6F%75%74%6C%6F%6F%6B%2D%6C%6F%63%61%6C%6C%79%22%5F)
 - [Development](#%64%65%76%65%6C%6F%70%6D%65%6E%74)
   - [Prerequisites (for Developers)](#%70%72%65%72%65%71%75%69%73%69%74%65%73%2D%28%66%6F%72%2D%64%65%76%65%6C%6F%70%65%72%73%29)
     - [Windows](#%77%69%6E%64%6F%77%73)
@@ -61,6 +62,12 @@ Depending on your system you should be able to change when different battery pro
 Unfortunately colorama (the library used to provide coloured output in the terminal) doesn't play nicely with GitBash on Windows.
 
 Try running OCT again from Powershell to see if it resolves the issue.
+
+### Error: _"RuntimeError: Failed to connect to Outlook locally"_
+
+OCT tried asking Outlook to connect locally but we didn't hear back from Outlook.
+
+Try force closing Outlook from Task Manager, then try running OCT again.
 
 ## Development
 
