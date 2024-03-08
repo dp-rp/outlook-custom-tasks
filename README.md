@@ -112,7 +112,7 @@ poetry install
 
 ## Notices
 
-This project has no direct associations with Microsoft or the people responsible for the development of Microsoft's Outlook.
+This project is not affiliated with Microsoft or Outlook.
 
 ## Special Thanks
 
