@@ -290,6 +290,7 @@ def group_by_subject(messages):
 
 def get_sender_email_address(message):
     try:
+        # TODO: if getting Sender Email Address take longer than 30 seconds, cancel and raise error (something has gone wrong while speaking to Outlook - potentially internet connection dropped? seemed to be when I first saw this issue)
         return message.SenderEmailAddress
     except KeyboardInterrupt:
         raise KeyboardInterrupt
