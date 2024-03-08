@@ -113,3 +113,7 @@ poetry install
 ## Notices
 
 This project has no direct associations with Microsoft or the people responsible for the development of Microsoft's Outlook.
+
+## Special Thanks
+
+- [Mark Hammond](https://github.com/mhammond) and [all the other contributors](https://github.com/mhammond/pywin32/graphs/contributors) to the [pywin32](https://github.com/mhammond/pywin32) library used to connect to Outlook locally
