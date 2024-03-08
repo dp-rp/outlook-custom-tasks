@@ -41,11 +41,25 @@ The following commands should be ran from the root of your copy of the project r
 poetry install
 ```
 
-### Usage (for Developers)
+## Usage
+
+### 1. Configuration
+
+Create your own `oct.settings.json` configuration file to define your rules.
+
+You can use [`oct.settings.example.json`](./oct.settings.example.json) as an example.
+
+To learn about how to write your own `oct.settings.json` file, see [Configuration](#configuration).
+
+### 2. Run Configured Tasks
 
 ```bash
-poetry run python -m outlookcustomtasks
+oct # if you're a developer, prefix this with `poetry run`
 ```
+
+## Configuration
+
+TODO
 
 ## Troubleshooting
 
