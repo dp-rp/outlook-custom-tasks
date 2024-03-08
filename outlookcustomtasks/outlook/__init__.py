@@ -6,7 +6,9 @@ from alive_progress import alive_bar as progressBar
 
 class OutlookClient:
     def __init__(self) -> None:
-        self._outlook = win32com.client.Dispatch('Outlook.Application').GetNamespace("MAPI")
+        with progressBar(title=f"connecting to Outlook locally", bar="filling") as bar:
+            self._outlook = win32com.client.Dispatch('Outlook.Application').GetNamespace("MAPI")
+            bar()
         self._inbox = None
 
     def inbox(self):
