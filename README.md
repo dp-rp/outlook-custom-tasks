@@ -2,9 +2,42 @@
 
 ## Development
 
+### Prerequisites (for Developers)
+
+#### Windows
+
+```powershell
+# NOTE: do not use an elevated (admin) terminal
+
+git clone https://github.com/dp-rp/outlook-custom-tasks.git
+cd outlook-custom-tasks
+
+# Install pipx (used to install Poetry in it's own isolated venv)
+py -m pip install --user pipx  # if you installed Python using Microsoft Store, replace `py` with `python3`
+.\.util-scripts\configure_pipx_windows.ps1
+```
+
+Open a new terminal
+
+```powershell
+# NOTE: do not use an elevated (admin) terminal
+
+# install Poetry (using Pipx)
+pipx install poetry  # install Poetry
+poetry -V  # test Poetry installed successfully
+```
+
 ### Installation (for Developers)
 
+**NOTE:** Ensure you have already installed the prerequisites by following [these instructions](#prerequisites-for-developers)
+
+The following commands should be ran from the root of your copy of the project repository
+
+#### Windows
+
 ```bash
+# NOTE: do not use an elevated (admin) terminal
+
 poetry install
 ```
 
