@@ -59,6 +59,8 @@ oct # if you're a developer, prefix this with `poetry run`
 
 ## Configuration
 
+<!-- TODO: fill this out once an official json schema is implemented w/ validation -->
+
 TODO
 
 ## Troubleshooting
