@@ -56,3 +56,10 @@ If you're on a laptop or other portable system, your system might have switched 
 Try putting your device on charge to quickly check if that's the source of performance suddenly getting worse.
 
 Depending on your system you should be able to change when different battery profiles are used, but only do this if you know what you're doing. If you really need to run some particularly demanding rules, you may be better off just putting your device on charge.
+
+### Error: _"UnicodeEncodeError: 'charmap' codec can't encode characters in position 1-40: character maps to \<undefined\>"_
+
+Unfortunately colorama (the library used to provide coloured output in the terminal) doesn't play nicely with GitBash on Windows.
+
+Try running OCT again from Powershell to see if it resolves the issue.
+

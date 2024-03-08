@@ -241,7 +241,7 @@ def run_rule(rule, all_folders):
                 
             else:
                 raise Exception(f"No supported OCT action names were found in defined actions")
-                
+
         else:
             raise NotImplementedError("Multiple OCT actions not yet supported.")
 
@@ -301,17 +301,21 @@ def get_sender_email_address(message):
 # --- SCRIPT ---
 # -------------
 
-# for each rule defined in settings file
-if len(_settings["rules"]) < 1:
-    print(f"{Fore.YELLOW}Warning: No OCT rules defined!{Style.RESET_ALL}")
+def run_script():
 
-# HACK: grabs all folders recursively up front even if we don't need them all
-# ...  (only an issue if there is a significantly large number of folders)
-all_folders = olc.inbox_folders_recursive_flat()
+    if len(_settings["rules"]) < 1:
+        print(f"{Fore.YELLOW}Warning: No OCT rules defined!{Style.RESET_ALL}")
 
-for rule in _settings["rules"]:
-    # run the rule
-    run_rule(rule, all_folders)
+    # HACK: grabs all folders recursively up front even if we don't need them all
+    # ...  (only an issue if there is a significantly large number of folders)
+    all_folders = olc.inbox_folders_recursive_flat()
+
+    # for each rule defined in settings file
+    for rule in _settings["rules"]:
+        run_rule(rule, all_folders)
+
+if __name__ == "__main__":
+    run_script()
 
 # # FIXME: below is temporary
 # matches = olc.find_messages(
