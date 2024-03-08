@@ -63,3 +63,6 @@ Unfortunately colorama (the library used to provide coloured output in the termi
 
 Try running OCT again from Powershell to see if it resolves the issue.
 
+## Notices
+
+This project has no direct associations with Microsoft or the people responsible for the development of Microsoft's Outlook.
