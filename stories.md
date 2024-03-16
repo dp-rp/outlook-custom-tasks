@@ -31,3 +31,6 @@
 - As a developer, I want the project to use open source tools and/or libraries wherever possible.
 - As a developer, I want the project and tool to follow best practices where possible.
 - As a developer, I want the project and tool to follow the SLSA specification the best it can.
+
+## Contributors
+- As a contributor, I want to contribute to the project by suggesting new rules and/or improving existing ones.
