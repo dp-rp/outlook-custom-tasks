@@ -108,7 +108,12 @@ def run_rule(rule, all_folders):
     if len(rule["conditions"]) > 0:
         # print out basic information about each match
         for m in matches:
-            print(f"{Fore.CYAN}Found match:{Style.RESET_ALL} \"{m.Subject}\" from [{get_sender_email_address(m)}]({m.SenderName})] at {m.ReceivedTime}")
+            _sender_email_address = get_sender_email_address(m)
+            # HACK: checking if _sender_email_address is falsey is just an easy workaround
+            _sender_name = ('(' + m.SenderName + ')') if _sender_email_address else ""
+            # HACK: checking if _sender_email_address is falsey is just an easy workaround
+            _received_time = m.ReceivedTime if _sender_email_address else "UNKNOWN"
+            print(f"{Fore.CYAN}Found match:{Style.RESET_ALL} \"{m.Subject}\" from [{_sender_email_address}]{_sender_name} at {_received_time}")
 
     # print number of matches found
     match_count = len(matches)
@@ -235,7 +240,17 @@ def run_rule(rule, all_folders):
 
                 highest_message_count_chars = len(str(top_senders[0]['sender_message_count']))
                 # HACK: sorry, lol
-                longest_sender_name_chars = len(max(top_senders, key=lambda s: len(s['sender_email_address']))['sender_email_address'])
+                longest_sender_name = max(
+                    top_senders,
+                    key=lambda s: 0 if s['sender_email_address'] is None else len(s['sender_email_address'])
+                )['sender_email_address']
+
+                # HACK: handle if a top sender cannot get email address retrieved by just throwing an error
+                for sender in top_senders:
+                    if sender['sender_email_address'] is None:
+                        raise RuntimeError("A top sender has no sender email address!")
+
+                longest_sender_name_chars = len(longest_sender_name)
                 for sender_group in top_senders:
                     print(f"[ {Fore.LIGHTRED_EX}{sender_group['sender_message_count']:>{highest_message_count_chars}}{Style.RESET_ALL} ] [ {Fore.CYAN}{sender_group['sender_email_address']:<{longest_sender_name_chars}}{Style.RESET_ALL} ]")
 
