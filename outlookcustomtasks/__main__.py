@@ -39,9 +39,9 @@ def get_predicates_from_conditions(conditions):
                 predicates.append(cond.subject_starts_with(condition["subject_starts_with"]))
                 bar()
             elif "sender_matches" in condition:
+                # TODO: get this from cond instead of defining func inline
                 def sender_matches(sender_to_match):
                     return lambda m: get_sender_email_address(m) == sender_to_match
-                
                 predicates.append(sender_matches(condition["sender_matches"]))
                 # predicates.append(cond.sender_matches(condition["sender_matches"]))
                 bar()
