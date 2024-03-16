@@ -1,7 +1,8 @@
 # TODO
 
 - [ ] Write basic tests.
-- [ ] Make the testing environment for the tool unable to connect to the internet other than whatever is required to interface with the container to ensure connection isn't necessary for the tool to work properly
+- [ ] Make the testing environment for the tool unable to connect to the internet other than whatever is required to interface with the container to ensure connection isn't necessary for the tool to work properly.
+- [ ] If Outlook takes >30 seconds to give a response to a given query, prompt the user with an error message saying something along the lines of "Outlook is taking too long to respond, do you want me to manually kill it's process, reconnect, and try again?".
 - [ ] **UX:** Provide a user-friendly interface or step-by-step wizard to help users create and manage their rules without requiring technical knowledge.
 - [ ] **UX:** Implement an undo feature that allows users to revert any accidental changes made to their Outlook inbox.
 - [ ] **Rule Creation:** Have a standard well considered way of allowing rules to have AND/OR/XOR/ETC. relationships between conditions (but in user-friendly language) and NOTs.
