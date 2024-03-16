@@ -3,8 +3,6 @@
 # --------------
 
 # built in
-from pprint import pprint
-from collections import Counter
 from itertools import groupby
 # site
 from colorama import Fore, Back, Style, init as colorama_init
@@ -35,17 +33,21 @@ def get_predicates_from_conditions(conditions):
     with progressBar(len(conditions), title=f"generating predicates", bar="filling", stats=True) as bar:
         for condition in conditions:
             if "subject_matches" in condition:
-                predicates.append(lambda m: m.Subject == condition["subject_matches"])
+                predicates.append(cond.subject_matches(condition["subject_matches"]))
                 bar()
             elif "subject_starts_with" in condition:
-                predicates.append(lambda m: m.Subject.startswith(condition["subject_starts_with"]))
+                predicates.append(cond.subject_starts_with(condition["subject_starts_with"]))
                 bar()
             elif "sender_matches" in condition:
                 def sender_matches(sender_to_match):
                     return lambda m: get_sender_email_address(m) == sender_to_match
                 
                 predicates.append(sender_matches(condition["sender_matches"]))
+                # predicates.append(cond.sender_matches(condition["sender_matches"]))
                 bar()
+            elif "is_unread" in condition:
+                # FIXME: add into schema validation later to make sure the value of is_unread is a boolean
+                predicates.append(cond.is_unread(condition["is_unread"]))
             else:
                 raise RuntimeError("unsupported OCT condition!")
     return predicates
