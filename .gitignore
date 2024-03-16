@@ -161,3 +161,4 @@ cython_debug/
 
 ### PROJECT SPECIFIC
 oct.settings.json
+oct.settings.json.backup

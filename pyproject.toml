@@ -12,6 +12,8 @@ pywin32 = "^306"
 alive-progress = "^3.1.5"
 colorama = "^0.4.6"
 
+[tool.poetry.scripts]
+oct = 'outlookcustomtasks.__main__:run_script'
 
 [build-system]
 requires = ["poetry-core"]

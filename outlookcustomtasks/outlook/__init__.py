@@ -2,11 +2,21 @@
 from typing import List
 # site
 import win32com.client
+from pywintypes import com_error
 from alive_progress import alive_bar as progressBar
 
 class OutlookClient:
     def __init__(self) -> None:
-        self._outlook = win32com.client.Dispatch('Outlook.Application').GetNamespace("MAPI")
+        try:
+            with progressBar(title=f"asking Outlook to let us connect locally", bar="filling") as bar:
+                self._outlook = win32com.client.Dispatch('Outlook.Application').GetNamespace("MAPI")
+                bar()
+        except KeyboardInterrupt:
+            raise KeyboardInterrupt
+        except com_error as err:
+            raise RuntimeError("Failed to connect to Outlook locally") from err
+        except Exception as err:
+            raise err
         self._inbox = None
 
     def inbox(self):

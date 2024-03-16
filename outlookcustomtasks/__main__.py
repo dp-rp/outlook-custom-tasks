@@ -3,8 +3,6 @@
 # --------------
 
 # built in
-from pprint import pprint
-from collections import Counter
 from itertools import groupby
 # site
 from colorama import Fore, Back, Style, init as colorama_init
@@ -35,17 +33,21 @@ def get_predicates_from_conditions(conditions):
     with progressBar(len(conditions), title=f"generating predicates", bar="filling", stats=True) as bar:
         for condition in conditions:
             if "subject_matches" in condition:
-                predicates.append(lambda m: m.Subject == condition["subject_matches"])
+                predicates.append(cond.subject_matches(condition["subject_matches"]))
                 bar()
             elif "subject_starts_with" in condition:
-                predicates.append(lambda m: m.Subject.startswith(condition["subject_starts_with"]))
+                predicates.append(cond.subject_starts_with(condition["subject_starts_with"]))
                 bar()
             elif "sender_matches" in condition:
+                # TODO: get this from cond instead of defining func inline
                 def sender_matches(sender_to_match):
                     return lambda m: get_sender_email_address(m) == sender_to_match
-                
                 predicates.append(sender_matches(condition["sender_matches"]))
+                # predicates.append(cond.sender_matches(condition["sender_matches"]))
                 bar()
+            elif "is_unread" in condition:
+                # FIXME: add into schema validation later to make sure the value of is_unread is a boolean
+                predicates.append(cond.is_unread(condition["is_unread"]))
             else:
                 raise RuntimeError("unsupported OCT condition!")
     return predicates
@@ -106,7 +108,12 @@ def run_rule(rule, all_folders):
     if len(rule["conditions"]) > 0:
         # print out basic information about each match
         for m in matches:
-            print(f"{Fore.CYAN}Found match:{Style.RESET_ALL} \"{m.Subject}\" from [{get_sender_email_address(m)}]({m.SenderName})] at {m.ReceivedTime}")
+            _sender_email_address = get_sender_email_address(m)
+            # HACK: checking if _sender_email_address is falsey is just an easy workaround
+            _sender_name = ('(' + m.SenderName + ')') if _sender_email_address else ""
+            # HACK: checking if _sender_email_address is falsey is just an easy workaround
+            _received_time = m.ReceivedTime if _sender_email_address else "UNKNOWN"
+            print(f"{Fore.CYAN}Found match:{Style.RESET_ALL} \"{m.Subject}\" from [{_sender_email_address}]{_sender_name} at {_received_time}")
 
     # print number of matches found
     match_count = len(matches)
@@ -233,7 +240,17 @@ def run_rule(rule, all_folders):
 
                 highest_message_count_chars = len(str(top_senders[0]['sender_message_count']))
                 # HACK: sorry, lol
-                longest_sender_name_chars = len(max(top_senders, key=lambda s: len(s['sender_email_address']))['sender_email_address'])
+                longest_sender_name = max(
+                    top_senders,
+                    key=lambda s: 0 if s['sender_email_address'] is None else len(s['sender_email_address'])
+                )['sender_email_address']
+
+                # HACK: handle if a top sender cannot get email address retrieved by just throwing an error
+                for sender in top_senders:
+                    if sender['sender_email_address'] is None:
+                        raise RuntimeError("A top sender has no sender email address!")
+
+                longest_sender_name_chars = len(longest_sender_name)
                 for sender_group in top_senders:
                     print(f"[ {Fore.LIGHTRED_EX}{sender_group['sender_message_count']:>{highest_message_count_chars}}{Style.RESET_ALL} ] [ {Fore.CYAN}{sender_group['sender_email_address']:<{longest_sender_name_chars}}{Style.RESET_ALL} ]")
 
@@ -241,7 +258,7 @@ def run_rule(rule, all_folders):
                 
             else:
                 raise Exception(f"No supported OCT action names were found in defined actions")
-                
+
         else:
             raise NotImplementedError("Multiple OCT actions not yet supported.")
 
@@ -290,6 +307,7 @@ def group_by_subject(messages):
 
 def get_sender_email_address(message):
     try:
+        # TODO: if getting Sender Email Address take longer than 30 seconds, cancel and raise error (something has gone wrong while speaking to Outlook - potentially internet connection dropped? seemed to be when I first saw this issue)
         return message.SenderEmailAddress
     except KeyboardInterrupt:
         raise KeyboardInterrupt
@@ -301,17 +319,21 @@ def get_sender_email_address(message):
 # --- SCRIPT ---
 # -------------
 
-# for each rule defined in settings file
-if len(_settings["rules"]) < 1:
-    print(f"{Fore.YELLOW}Warning: No OCT rules defined!{Style.RESET_ALL}")
+def run_script():
 
-# HACK: grabs all folders recursively up front even if we don't need them all
-# ...  (only an issue if there is a significantly large number of folders)
-all_folders = olc.inbox_folders_recursive_flat()
+    if len(_settings["rules"]) < 1:
+        print(f"{Fore.YELLOW}Warning: No OCT rules defined!{Style.RESET_ALL}")
 
-for rule in _settings["rules"]:
-    # run the rule
-    run_rule(rule, all_folders)
+    # HACK: grabs all folders recursively up front even if we don't need them all
+    # ...  (only an issue if there is a significantly large number of folders)
+    all_folders = olc.inbox_folders_recursive_flat()
+
+    # for each rule defined in settings file
+    for rule in _settings["rules"]:
+        run_rule(rule, all_folders)
+
+if __name__ == "__main__":
+    run_script()
 
 # # FIXME: below is temporary
 # matches = olc.find_messages(
