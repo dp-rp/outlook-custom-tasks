@@ -269,6 +269,15 @@ def group_by_sender_email_address(messages):
         for message in messages:
             # get sender's email address
             sender_email_address = get_sender_email_address(message)
+            
+            # # NOTE: for debugging
+            # if sender_email_address is None:
+            #     print("Refusing to group sender by email address when email address is None!")
+            #     print(sender_email_address)
+            #     _inspect_thing('message',message)
+            #     print(message.Subject)
+            #     print("second attempt:",get_sender_email_address(message))
+            #     exit()
 
             # if no emails from sender yet
             if not sender_email_address in grouped_by_sender:
