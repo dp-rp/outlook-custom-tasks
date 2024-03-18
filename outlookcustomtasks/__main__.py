@@ -15,6 +15,9 @@ from outlookcustomtasks.settings import get_settings
 # --- CONSTANTS ---
 # ----------------
 MOVE_RESPONSE_DEFAULT = "n"
+BASIC_ANALYTICS_SUBJECT_LIMIT = 10
+SENDER_ANALYTICS_SENDER_LIMIT = 20
+MAIL_ITEM_CLASS_ID = 43
 
 # ---------------------
 # --- INITIALIZATION ---
@@ -188,8 +191,6 @@ def run_rule(rule, all_folders):
                 # GET TOP 10 IDENTICAL SUBJECTS REGARDLESS OF SENDER #
                 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-                LIMIT = 10
-                
                 messages_grouped_by_subject = group_by_subject(matches)
 
                 subjects = [
@@ -206,10 +207,10 @@ def run_rule(rule, all_folders):
                     subjects,
                     key=lambda s: s['message_count'],
                     reverse=True
-                )[:LIMIT]
+                )[:BASIC_ANALYTICS_SUBJECT_LIMIT]
 
-                # print(f"Top {limit} offenders for senders that have sent messages with identical subject lines:")
-                print(f"\n{Fore.BLACK}{Back.GREEN} Top {LIMIT} (or less) offenders for messages with identical subject lines (regardless of sender): {Style.RESET_ALL}\n")
+                # print(f"Top {BASIC_ANALYTICS_SUBJECT_LIMIT} offenders for senders that have sent messages with identical subject lines:")
+                print(f"\n{Fore.BLACK}{Back.GREEN} Top {BASIC_ANALYTICS_SUBJECT_LIMIT} (or less) offenders for messages with identical subject lines (regardless of sender): {Style.RESET_ALL}\n")
 
                 for subject in subjects_sorted_by_message_count:
                     print(f"[ {subject['message_count']:>3} x ] subject: [{subject['subject']}]")
@@ -219,8 +220,6 @@ def run_rule(rule, all_folders):
             elif "sender_analytics" in first_action:
                 # HACK: just a quick dirty implementation
                 print("\n----[ Sender Analytics ]----\n")
-
-                LIMIT = 20
 
                 # HACK: just a quick hacky way to do this
                 messages_grouped_by_sender_email_address = [
@@ -234,9 +233,9 @@ def run_rule(rule, all_folders):
                     reverse=True
                 )
 
-                top_senders = sender_email_addresses_by_sent[:LIMIT]
+                top_senders = sender_email_addresses_by_sent[:SENDER_ANALYTICS_SENDER_LIMIT]
 
-                print(f"\n{Fore.BLACK}{Back.GREEN} Top {LIMIT} (or less) offenders for senders that sent the most messages: {Style.RESET_ALL}\n")
+                print(f"\n{Fore.BLACK}{Back.GREEN} Top {SENDER_ANALYTICS_SENDER_LIMIT} (or less) offenders for senders that sent the most messages: {Style.RESET_ALL}\n")
 
                 highest_message_count_chars = len(str(top_senders[0]['sender_message_count']))
                 # HACK: sorry, lol
@@ -307,12 +306,35 @@ def group_by_subject(messages):
 
 def get_sender_email_address(message):
     try:
-        # TODO: if getting Sender Email Address take longer than 30 seconds, cancel and raise error (something has gone wrong while speaking to Outlook - potentially internet connection dropped? seemed to be when I first saw this issue)
-        return message.SenderEmailAddress
-    except KeyboardInterrupt:
-        raise KeyboardInterrupt
-    except:
-        print(f"{Fore.YELLOW}Warning: unknown sender email address for message with subject \"{message.Subject}\"{Style.RESET_ALL}")
+        # Check if the item is an Outlook MailItem
+        if message.Class == MAIL_ITEM_CLASS_ID:
+            # if sender email type is Exchange
+            if message.SenderEmailType == 'EX':
+                exchange_user = message.Sender.GetExchangeUser()
+                # if exchange user found
+                if exchange_user is not None:
+                    return exchange_user.PrimarySmtpAddress
+                # if exchange user not found
+                else:
+                    # fall back to SenderEmailAddress
+                    return message.SenderEmailAddress
+            # if sender email type ISN'T Exchange
+            else:
+                return message.SenderEmailAddress
+        # If item ISN'T an Outlook MailItem
+        else:
+            try:
+                sender_name = message.SenderName
+            except Exception as err:
+                print(f"{Fore.YELLOW}Warning: unable to get sender name for message with subject \"{message.Subject}\"{Style.RESET_ALL}: {err}")
+                sender_name = "[UNKNOWN]"
+            finally:
+                return f"[N/A] {message.MessageClass}: {sender_name}"
+    except KeyboardInterrupt as err:
+        raise err
+    except Exception as err:
+        print(f"{Fore.YELLOW}Warning: unknown sender email address for message with subject \"{message.Subject}\"{Style.RESET_ALL}: {err}")
+
         return None
 
 # -------------
