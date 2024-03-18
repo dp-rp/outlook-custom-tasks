@@ -15,6 +15,8 @@ from outlookcustomtasks.settings import get_settings
 # --- CONSTANTS ---
 # ----------------
 MOVE_RESPONSE_DEFAULT = "n"
+BASIC_ANALYTICS_SUBJECT_LIMIT = 10
+SENDER_ANALYTICS_SENDER_LIMIT = 20
 
 # ---------------------
 # --- INITIALIZATION ---
@@ -188,8 +190,6 @@ def run_rule(rule, all_folders):
                 # GET TOP 10 IDENTICAL SUBJECTS REGARDLESS OF SENDER #
                 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-                LIMIT = 10
-                
                 messages_grouped_by_subject = group_by_subject(matches)
 
                 subjects = [
@@ -206,10 +206,10 @@ def run_rule(rule, all_folders):
                     subjects,
                     key=lambda s: s['message_count'],
                     reverse=True
-                )[:LIMIT]
+                )[:BASIC_ANALYTICS_SUBJECT_LIMIT]
 
-                # print(f"Top {limit} offenders for senders that have sent messages with identical subject lines:")
-                print(f"\n{Fore.BLACK}{Back.GREEN} Top {LIMIT} (or less) offenders for messages with identical subject lines (regardless of sender): {Style.RESET_ALL}\n")
+                # print(f"Top {BASIC_ANALYTICS_SUBJECT_LIMIT} offenders for senders that have sent messages with identical subject lines:")
+                print(f"\n{Fore.BLACK}{Back.GREEN} Top {BASIC_ANALYTICS_SUBJECT_LIMIT} (or less) offenders for messages with identical subject lines (regardless of sender): {Style.RESET_ALL}\n")
 
                 for subject in subjects_sorted_by_message_count:
                     print(f"[ {subject['message_count']:>3} x ] subject: [{subject['subject']}]")
@@ -219,8 +219,6 @@ def run_rule(rule, all_folders):
             elif "sender_analytics" in first_action:
                 # HACK: just a quick dirty implementation
                 print("\n----[ Sender Analytics ]----\n")
-
-                LIMIT = 20
 
                 # HACK: just a quick hacky way to do this
                 messages_grouped_by_sender_email_address = [
@@ -234,9 +232,9 @@ def run_rule(rule, all_folders):
                     reverse=True
                 )
 
-                top_senders = sender_email_addresses_by_sent[:LIMIT]
+                top_senders = sender_email_addresses_by_sent[:SENDER_ANALYTICS_SENDER_LIMIT]
 
-                print(f"\n{Fore.BLACK}{Back.GREEN} Top {LIMIT} (or less) offenders for senders that sent the most messages: {Style.RESET_ALL}\n")
+                print(f"\n{Fore.BLACK}{Back.GREEN} Top {SENDER_ANALYTICS_SENDER_LIMIT} (or less) offenders for senders that sent the most messages: {Style.RESET_ALL}\n")
 
                 highest_message_count_chars = len(str(top_senders[0]['sender_message_count']))
                 # HACK: sorry, lol
