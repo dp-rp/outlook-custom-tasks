@@ -17,6 +17,7 @@ from outlookcustomtasks.settings import get_settings
 MOVE_RESPONSE_DEFAULT = "n"
 BASIC_ANALYTICS_SUBJECT_LIMIT = 10
 SENDER_ANALYTICS_SENDER_LIMIT = 20
+MAIL_ITEM_CLASS_ID = 43
 
 # ---------------------
 # --- INITIALIZATION ---
@@ -314,12 +315,46 @@ def group_by_subject(messages):
 
 def get_sender_email_address(message):
     try:
-        # TODO: if getting Sender Email Address take longer than 30 seconds, cancel and raise error (something has gone wrong while speaking to Outlook - potentially internet connection dropped? seemed to be when I first saw this issue)
-        return message.SenderEmailAddress
-    except KeyboardInterrupt:
-        raise KeyboardInterrupt
-    except:
-        print(f"{Fore.YELLOW}Warning: unknown sender email address for message with subject \"{message.Subject}\"{Style.RESET_ALL}")
+        if message.Class == MAIL_ITEM_CLASS_ID:  # Check if the item is a MailItem
+            if message.SenderEmailType == 'EX':
+                exchange_user = message.Sender.GetExchangeUser()
+                # if exchange user found
+                if exchange_user is not None:
+                    return exchange_user.PrimarySmtpAddress
+                # if exchange user not found
+                else:
+                    # fall back to SenderEmailAddress
+                    return message.SenderEmailAddress
+            else:
+                return message.SenderEmailAddress
+        # elif message.Class == CALENDAR_ITEM_CLASS_ID:
+        #     print(message.Subject) # TODO: temp
+        #     return "[N/A] Calendar Item"
+        #     # return "[N/A] Calendar Item (sent by {message.SenderName})"
+        # elif message.Class == MEETING_REQUEST_CLASS_ID:
+        #     print(message.Subject) # TODO: temp
+        #     return "[N/A] Meeting Request"
+        #     # return "[N/A] Meeting Request (sent by {message.SenderName})"
+        else:
+            try:
+                sender_name = message.SenderName
+                # return f"[N/A] {message.MessageClass}"
+                # raise TypeError(f"is not a mail item ([.Class]: {message.Class} [.MessageClass: {message.MessageClass}])")
+            except Exception as err:
+                print(f"{Fore.YELLOW}Warning: unable to get sender name for message with subject \"{message.Subject}\"{Style.RESET_ALL}: {err}")
+                sender_name = "[UNKNOWN]"
+            finally:
+                return f"[N/A] {message.MessageClass}: {sender_name}"
+
+    except KeyboardInterrupt as err:
+        raise err
+    except Exception as err:
+        print(f"{Fore.YELLOW}Warning: unknown sender email address for message with subject \"{message.Subject}\"{Style.RESET_ALL}: {err}")
+
+        # TODO: temp
+        # _inspect_thing('message',message)
+        # raise err
+
         return None
 
 # -------------
