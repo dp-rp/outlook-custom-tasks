@@ -269,15 +269,6 @@ def group_by_sender_email_address(messages):
             # get sender's email address
             sender_email_address = get_sender_email_address(message)
             
-            # # NOTE: for debugging
-            # if sender_email_address is None:
-            #     print("Refusing to group sender by email address when email address is None!")
-            #     print(sender_email_address)
-            #     _inspect_thing('message',message)
-            #     print(message.Subject)
-            #     print("second attempt:",get_sender_email_address(message))
-            #     exit()
-
             # if no emails from sender yet
             if not sender_email_address in grouped_by_sender:
                 # create empty array for sender messages
@@ -327,19 +318,9 @@ def get_sender_email_address(message):
                     return message.SenderEmailAddress
             else:
                 return message.SenderEmailAddress
-        # elif message.Class == CALENDAR_ITEM_CLASS_ID:
-        #     print(message.Subject) # TODO: temp
-        #     return "[N/A] Calendar Item"
-        #     # return "[N/A] Calendar Item (sent by {message.SenderName})"
-        # elif message.Class == MEETING_REQUEST_CLASS_ID:
-        #     print(message.Subject) # TODO: temp
-        #     return "[N/A] Meeting Request"
-        #     # return "[N/A] Meeting Request (sent by {message.SenderName})"
         else:
             try:
                 sender_name = message.SenderName
-                # return f"[N/A] {message.MessageClass}"
-                # raise TypeError(f"is not a mail item ([.Class]: {message.Class} [.MessageClass: {message.MessageClass}])")
             except Exception as err:
                 print(f"{Fore.YELLOW}Warning: unable to get sender name for message with subject \"{message.Subject}\"{Style.RESET_ALL}: {err}")
                 sender_name = "[UNKNOWN]"
@@ -350,10 +331,6 @@ def get_sender_email_address(message):
         raise err
     except Exception as err:
         print(f"{Fore.YELLOW}Warning: unknown sender email address for message with subject \"{message.Subject}\"{Style.RESET_ALL}: {err}")
-
-        # TODO: temp
-        # _inspect_thing('message',message)
-        # raise err
 
         return None
 
