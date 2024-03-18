@@ -306,7 +306,9 @@ def group_by_subject(messages):
 
 def get_sender_email_address(message):
     try:
-        if message.Class == MAIL_ITEM_CLASS_ID:  # Check if the item is a MailItem
+        # Check if the item is an Outlook MailItem
+        if message.Class == MAIL_ITEM_CLASS_ID:
+            # if sender email type is Exchange
             if message.SenderEmailType == 'EX':
                 exchange_user = message.Sender.GetExchangeUser()
                 # if exchange user found
@@ -316,8 +318,10 @@ def get_sender_email_address(message):
                 else:
                     # fall back to SenderEmailAddress
                     return message.SenderEmailAddress
+            # if sender email type ISN'T Exchange
             else:
                 return message.SenderEmailAddress
+        # If item ISN'T an Outlook MailItem
         else:
             try:
                 sender_name = message.SenderName
@@ -326,7 +330,6 @@ def get_sender_email_address(message):
                 sender_name = "[UNKNOWN]"
             finally:
                 return f"[N/A] {message.MessageClass}: {sender_name}"
-
     except KeyboardInterrupt as err:
         raise err
     except Exception as err:
