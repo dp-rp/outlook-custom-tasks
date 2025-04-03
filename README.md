@@ -117,3 +117,4 @@ This project is not affiliated with Microsoft or Outlook.
 ## Special Thanks
 
 - [Mark Hammond](https://github.com/mhammond) and [all the other contributors](https://github.com/mhammond/pywin32/graphs/contributors) to the [pywin32](https://github.com/mhammond/pywin32) library used to connect to Outlook locally
+- [leGIT-bot](https://github.com/leGIT-bot) for help with user testing
