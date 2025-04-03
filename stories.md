@@ -13,6 +13,15 @@
 - As a user, I'd optionally like to be able to have an AI make suggestions about what kind of rules I may want to create next based on patterns it finds.
 - As a professional, I want to be able to share my rules and insights with my teammates.
 
+<!-- - As a user, I want to be able to easily gain insights into patterns in my email traffic, to help me prioritize which rules I create first.
+  - e.g. things like which senders are sending me the most emails to help me prioritize which rules I create first
+- As a user, I want to be able to filter which emails I effect with greater control than offered by Outlook's built in filtering capabilities.
+- As a user, I want to be able to do simple things in simple ways.
+- As a user, I want to be able to do more complex things in ways that build upon the simpler approaches
+
+- As a developer, I want the tool to be well documented.
+- As a developer, I want the tool to be extensively tested -->
+
 ## Rule Creator
 
 - As a rule creator, I want to be able to filter down emails that DO match certain conditions, but DON'T match others.
